@@ -1,8 +1,8 @@
 // Supabase Integration for Gas Monitoring System
 
 // Configuration - Replace with your actual Supabase credentials
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://dragdfllvihjqgznbjzj.supabase.com';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyYWdkZmxsdmloanFnem5ianpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTQ4NTIsImV4cCI6MjA4NzQ5MDg1Mn0.pVcg97xfOU4e3lIshghQcwBar6mc_xsQdZbY9uXQ5U4';
 
 // Initialize Supabase client
 let supabase;
@@ -16,8 +16,13 @@ function initializeSupabase() {
     try {
         // Only initialize if we have valid credentials
         if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase initialized successfully');
+            // Check if the Supabase client library is loaded
+            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase initialized successfully');
+            } else {
+                console.error('Supabase client library not loaded');
+            }
         } else {
             console.warn('Supabase credentials not configured. Using local storage only.');
         }
@@ -41,6 +46,25 @@ async function getDevice(deviceId) {
         return data;
     } catch (error) {
         console.error('Error fetching device:', error);
+        return null;
+    }
+}
+
+// Helper function to get device UUID by device_id (VARCHAR)
+async function getDeviceUuid(deviceId) {
+    if (!supabase) return null;
+    
+    try {
+        const { data, error } = await supabase
+            .from('devices')
+            .select('id')
+            .eq('device_id', deviceId)
+            .single();
+            
+        if (error) throw error;
+        return data ? data.id : null;
+    } catch (error) {
+        console.error('Error fetching device UUID:', error);
         return null;
     }
 }
@@ -69,10 +93,23 @@ async function getSensorThresholds(deviceId) {
     if (!supabase) return null;
     
     try {
+        // Check if deviceId is a UUID or VARCHAR device_id
+        let queryDeviceId = deviceId;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!deviceId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(deviceId);
+            if (!deviceUuid) {
+                console.error('Device not found:', deviceId);
+                return null;
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
         const { data, error } = await supabase
             .from('sensor_thresholds')
             .select('*')
-            .eq('device_id', deviceId);
+            .eq('device_id', queryDeviceId);
             
         if (error) throw error;
         return data;
@@ -86,9 +123,25 @@ async function upsertSensorThreshold(thresholdData) {
     if (!supabase) return null;
     
     try {
+        // Check if device_id is a UUID or VARCHAR device_id
+        let queryDeviceId = thresholdData.device_id;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!thresholdData.device_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(thresholdData.device_id);
+            if (!deviceUuid) {
+                console.error('Device not found:', thresholdData.device_id);
+                return null;
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
+        // Update the device_id with the UUID
+        const dataWithUuid = { ...thresholdData, device_id: queryDeviceId };
+        
         const { data, error } = await supabase
             .from('sensor_thresholds')
-            .upsert(thresholdData, {
+            .upsert(dataWithUuid, {
                 onConflict: 'device_id,sensor_type',
                 returning: 'representation'
             });
@@ -106,9 +159,25 @@ async function insertSensorReading(readingData) {
     if (!supabase) return null;
     
     try {
+        // Check if device_id is a UUID or VARCHAR device_id
+        let queryDeviceId = readingData.device_id;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!readingData.device_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(readingData.device_id);
+            if (!deviceUuid) {
+                console.error('Device not found:', readingData.device_id);
+                return null;
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
+        // Update the device_id with the UUID
+        const dataWithUuid = { ...readingData, device_id: queryDeviceId };
+        
         const { data, error } = await supabase
             .from('sensor_readings')
-            .insert(readingData);
+            .insert(dataWithUuid);
             
         if (error) throw error;
         return data;
@@ -122,10 +191,23 @@ async function getSensorReadings(deviceId, options = {}) {
     if (!supabase) return [];
     
     try {
+        // Check if deviceId is a UUID or VARCHAR device_id
+        let queryDeviceId = deviceId;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!deviceId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(deviceId);
+            if (!deviceUuid) {
+                console.error('Device not found:', deviceId);
+                return [];
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
         let query = supabase
             .from('sensor_readings')
             .select('*')
-            .eq('device_id', deviceId);
+            .eq('device_id', queryDeviceId);
             
         // Apply filters
         if (options.sensorType) {
@@ -167,10 +249,23 @@ async function getAlerts(deviceId, options = {}) {
     if (!supabase) return [];
     
     try {
+        // Check if deviceId is a UUID or VARCHAR device_id
+        let queryDeviceId = deviceId;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!deviceId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(deviceId);
+            if (!deviceUuid) {
+                console.error('Device not found:', deviceId);
+                return [];
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
         let query = supabase
             .from('alerts')
             .select('*')
-            .eq('device_id', deviceId);
+            .eq('device_id', queryDeviceId);
             
         // Apply filters
         if (options.acknowledged !== undefined) {
@@ -225,18 +320,31 @@ async function acknowledgeAlert(alertId, acknowledgedBy) {
 }
 
 // Real-time subscriptions
-function subscribeToSensorReadings(deviceId, callback) {
+async function subscribeToSensorReadings(deviceId, callback) {
     if (!supabase) return null;
     
     try {
+        // Check if deviceId is a UUID or VARCHAR device_id
+        let queryDeviceId = deviceId;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!deviceId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(deviceId);
+            if (!deviceUuid) {
+                console.error('Device not found:', deviceId);
+                return null;
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
         const subscription = supabase
-            .channel(`sensor_readings:${deviceId}`)
+            .channel(`sensor_readings:${queryDeviceId}`)
             .on('postgres_changes', 
                 { 
                     event: 'INSERT', 
                     schema: 'public', 
                     table: 'sensor_readings',
-                    filter: `device_id=eq.${deviceId}`
+                    filter: `device_id=eq.${queryDeviceId}`
                 }, 
                 (payload) => callback(payload.new)
             )
@@ -249,10 +357,11 @@ function subscribeToSensorReadings(deviceId, callback) {
     }
 }
 
-function subscribeToDeviceStatus(deviceId, callback) {
+async function subscribeToDeviceStatus(deviceId, callback) {
     if (!supabase) return null;
     
     try {
+        // For devices table, we can use the VARCHAR device_id directly
         const subscription = supabase
             .channel(`devices:${deviceId}`)
             .on('postgres_changes', 
@@ -273,18 +382,31 @@ function subscribeToDeviceStatus(deviceId, callback) {
     }
 }
 
-function subscribeToAlerts(deviceId, callback) {
+async function subscribeToAlerts(deviceId, callback) {
     if (!supabase) return null;
     
     try {
+        // Check if deviceId is a UUID or VARCHAR device_id
+        let queryDeviceId = deviceId;
+        
+        // If it's not a UUID format, get the UUID from devices table
+        if (!deviceId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            const deviceUuid = await getDeviceUuid(deviceId);
+            if (!deviceUuid) {
+                console.error('Device not found:', deviceId);
+                return null;
+            }
+            queryDeviceId = deviceUuid;
+        }
+        
         const subscription = supabase
-            .channel(`alerts:${deviceId}`)
+            .channel(`alerts:${queryDeviceId}`)
             .on('postgres_changes', 
                 { 
                     event: 'INSERT', 
                     schema: 'public', 
                     table: 'alerts',
-                    filter: `device_id=eq.${deviceId}`
+                    filter: `device_id=eq.${queryDeviceId}`
                 }, 
                 (payload) => callback(payload.new)
             )
@@ -313,10 +435,10 @@ function formatSensorReadingForSupabase(deviceId, sensorData, timestamp = new Da
 // Utility function to format device data for Supabase
 function formatDeviceForSupabase(deviceData) {
     return {
-        device_id: deviceData.id,
+        device_id: deviceData.id || deviceData.device_id,
         operator: deviceData.operator,
         ssid: deviceData.ssid,
-        wifi_status: deviceData.wifiStatus,
+        wifi_status: deviceData.wifiStatus || deviceData.wifi_status,
         last_online: deviceData.lastUpdate ? deviceData.lastUpdate.toISOString() : new Date().toISOString()
     };
 }
