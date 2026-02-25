@@ -1,0 +1,323 @@
+/* Authentication System Styles */
+
+/* Login Overlay */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #E60012 0%, #99000D 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-family: 'Source Sans Pro', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+/* Login Card */
+.login-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Login Header */
+.login-header {
+    background: #E60012;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.login-logo img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.login-logo img:hover {
+    transform: scale(1.05);
+}
+
+.login-header h2 {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.login-header p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Login Body */
+.login-body {
+    padding: 30px 20px;
+}
+
+.login-form .form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.login-form .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.login-form .form-control:focus {
+    border-color: #E60012;
+    box-shadow: 0 0 0 0.2rem rgba(230, 0, 18, 0.25);
+}
+
+.login-form .input-group .btn {
+    border: 2px solid #e9ecef;
+    border-left: none;
+    background: #f8f9fa;
+}
+
+.login-form .input-group .btn:hover {
+    background: #e9ecef;
+}
+
+.login-form .btn-primary {
+    background: #E60012;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.login-form .btn-primary:hover {
+    background: #CC0010;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(230, 0, 18, 0.3);
+}
+
+.login-form .btn-primary:disabled {
+    background: #6c757d;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Login Error */
+.login-error {
+    border-radius: 8px;
+    font-size: 14px;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Session Info in Header */
+.session-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(230, 0, 18, 0.8);
+    border-radius: 8px;
+}
+
+.session-timer {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    white-space: nowrap;
+    color: white;
+}
+
+.session-timer i {
+    margin-right: 5px;
+}
+
+/* Logout Button */
+.btn-logout {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #E60012;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-logout:hover {
+    background: white;
+    color: #E60012;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-logout i {
+    font-size: 16px;
+}
+
+/* Inactivity Warning Modal */
+#inactivity-warning-modal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#inactivity-warning-modal .modal-header {
+    background: #ffc107;
+    color: #333;
+    border-radius: 12px 12px 0 0;
+    border: none;
+}
+
+#inactivity-warning-modal .modal-title {
+    font-weight: 700;
+}
+
+#inactivity-countdown {
+    font-weight: 700;
+    color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 10px;
+    }
+    
+    .login-header {
+        padding: 20px 15px;
+    }
+    
+    .login-header h2 {
+        font-size: 20px;
+    }
+    
+    .login-body {
+        padding: 20px 15px;
+    }
+    
+    .session-info {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .login-card {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .login-form .form-control {
+        background: #4a5568;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .login-form .form-control:focus {
+        background: #4a5568;
+        border-color: #E60012;
+        color: #e2e8f0;
+    }
+    
+    .login-form .form-label {
+        color: #e2e8f0;
+    }
+}
+
+/* Loading spinner customization */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Password visibility toggle */
+.input-group .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+/* Focus states for accessibility */
+.login-form .form-control:focus,
+.login-form .btn:focus,
+.btn-logout:focus {
+    outline: 2px solid #E60012;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .login-overlay {
+        background: #000;
+    }
+    
+    .login-card {
+        border: 2px solid #fff;
+    }
+    
+    .login-form .form-control {
+        border-width: 2px;
+    }
+    
+    .login-form .btn-primary {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .login-card {
+        animation: none;
+    }
+    
+    .login-error {
+        animation: none;
+    }
+    
+    .login-form .btn-primary:hover,
+    .btn-logout:hover {
+        transform: none;
+    }
+}

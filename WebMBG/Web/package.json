@@ -1,0 +1,29 @@
+{
+  "name": "gas-monitoring-system",
+  "version": "1.0.0",
+  "description": "Web admin minimalis untuk monitoring data dari 10 sensor gas yang dikirim oleh ESP32",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "npx serve .",
+    "python": "python -m http.server 8000",
+    "python3": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "gas",
+    "monitoring",
+    "sensor",
+    "mqtt",
+    "esp32",
+    "dashboard",
+    "real-time"
+  ],
+  "author": "Gas Monitoring Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
